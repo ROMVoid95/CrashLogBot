@@ -15,7 +15,7 @@ apply plugin: 'com.github.ben-manes.versions'
 
 mainClassName = 'net.romvoid.crashbot.Bot'
 group = 'net.romvoid.crashbot'
-version = '1.0.0'
+version = '1.0.1'
 
 description = 'A Minecraft logs Discord Bot'
 
