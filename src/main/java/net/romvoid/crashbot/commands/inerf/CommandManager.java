@@ -58,7 +58,7 @@ public class CommandManager {
                 final String params = tokens[1].trim();
                 paramList = new ArrayList<>(Arrays.asList(params.split(" ")));
             }
-            command.execute(event, paramList);
+            command.executeAndHandle(event, paramList, null, null);
         });
     }
 

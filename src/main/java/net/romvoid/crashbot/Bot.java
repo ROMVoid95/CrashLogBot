@@ -33,6 +33,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.romvoid.crashbot.commands.GithubCommand;
 import net.romvoid.crashbot.commands.LatencyCommand;
 import net.romvoid.crashbot.commands.inerf.Command;
 import net.romvoid.crashbot.commands.inerf.CommandManager;
@@ -122,6 +123,7 @@ public class Bot {
 	 */
 	private void installCommands() {
 		commandManager.register(new LatencyCommand());
+		commandManager.register(new GithubCommand());
 	}
 
 	/**

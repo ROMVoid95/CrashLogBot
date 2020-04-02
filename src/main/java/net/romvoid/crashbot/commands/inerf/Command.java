@@ -22,11 +22,16 @@
  */
 package net.romvoid.crashbot.commands.inerf;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
-import java.util.*;
-
-// TODO: Auto-generated Javadoc
 /**
  * The Class Command.
  */
@@ -64,17 +69,19 @@ public abstract class Command {
     }
 
     /**
-     * Execute.
-     *
-     * @param event the event
-     * @param params the params
+     * @param args         arguments for the command
+     * @param channel      channel where the command is executed
+     * @param author       who invoked the command
+     * @param inputMessage the incoming message object
+     * @return the message to output or an empty string for nothing
      */
-    public abstract void execute(GuildMessageReceivedEvent event, List<String> params);
+    public abstract void executeAndHandle(GuildMessageReceivedEvent event, List<String> params, User author, Message inputMessage);
+    
 
     /**
      * Gets the name.
      *
-     * @return the name
+     * @return {@link #name}
      */
     public String getName() {
         return name;
@@ -90,7 +97,7 @@ public abstract class Command {
     /**
      * Gets the parameters.
      *
-     * @return the parameters
+     * @return {@link #parameters}
      */
     public List<String> getParameters() {
         return Collections.unmodifiableList(parameters);
@@ -99,7 +106,7 @@ public abstract class Command {
     /**
      * Gets the aliases.
      *
-     * @return the aliases
+     * @return {@link #aliases}
      */
     public Set<String> getAliases() {
         return Collections.unmodifiableSet(aliases);

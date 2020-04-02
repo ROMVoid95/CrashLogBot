@@ -24,6 +24,8 @@ package net.romvoid.crashbot.commands;
 
 import java.util.List;
 
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.romvoid.crashbot.Bot;
 import net.romvoid.crashbot.commands.inerf.Command;
@@ -41,18 +43,15 @@ public class LatencyCommand extends Command {
         addAlias("latency");
         addAlias("pong");
     }
+    
 
-    /**
-     * Execute.
-     *
-     * @param event the event
-     * @param params the params
-     */
-    @Override
-    public void execute(GuildMessageReceivedEvent event, List<String> params) {
+	@Override
+	public void executeAndHandle(GuildMessageReceivedEvent event, List<String> params,
+			User author, Message inputMessage) {
         event.getChannel().sendMessage("The current latency between me and the discord servers is " +
                 Bot.getJDA().getGatewayPing()).queue();
-    }
+		
+	}
 
     /**
      * Gets the description.
@@ -63,4 +62,5 @@ public class LatencyCommand extends Command {
     public String getDescription() {
         return "Returns latency between the discord bot and the official discord servers";
     }
+
 }
