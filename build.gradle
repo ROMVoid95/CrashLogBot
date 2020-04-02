@@ -1,0 +1,38 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.2'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.28.0'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'com.github.ben-manes.versions'
+
+mainClassName = "${mainClass)"
+group = "${group}"
+version = "${versionMajor}.${versionMinor}.${versionRev}.${versionBuild}"
+
+description = "${description}"
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+	maven {url "https://jitpack.io"}
+}
+
+dependencies {
+	implementation "org.apache.logging.log4j:log4j-api:2.13.1"
+	implementation "org.apache.logging.log4j:log4j-core:2.13.1"
+    testImplementation 'junit:junit:4.12'
+}
