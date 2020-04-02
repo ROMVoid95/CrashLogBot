@@ -1,5 +1,5 @@
 ## Overview
-CrashBot only use is to take the files that users upload to discord and takes the file, and uploads the file to a hastebin style website so Moderators, helpers or anyone else can easily read the logs instead of having to download the logs every time one is posted.
+CrashBot waits for users to upload files to discord and takes the file, and uploads said file to a hastebin style website so Moderators, helpers or anyone else can easily read the logs instead of having to download the logs every time one is posted.
 
 ## Building
 
