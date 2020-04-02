@@ -13,26 +13,47 @@ apply plugin: 'application'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'com.github.ben-manes.versions'
 
-mainClassName = "${mainClass)"
-group = "${group}"
-version = "${versionMajor}.${versionMinor}.${versionRev}.${versionBuild}"
+mainClassName = 'net.romvoid.crashbot.Bot'
+group = 'net.romvoid.crashbot'
+version = '1.0.0'
 
-description = "${description}"
+description = 'A Minecraft logs Discord Bot'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
+configurations {
+    embed
+    compile.extendsFrom(embed)
 }
 
 repositories {
-    mavenCentral()
+    maven {
+        url "https://jitpack.io"
+    }
     jcenter()
-	maven {url "https://jitpack.io"}
 }
 
 dependencies {
-	implementation "org.apache.logging.log4j:log4j-api:2.13.1"
-	implementation "org.apache.logging.log4j:log4j-core:2.13.1"
+    embed ('net.dv8tion:JDA:4.1.1_101'){
+        transitive = true
+        exclude module: 'opus-java'
+    }
+    embed 'commons-io:commons-io:2.5'
+    embed 'com.google.code.gson:gson:2.8.5'
+    embed 'org.json:json:20190722'
+	embed "org.apache.logging.log4j:log4j-api:2.13.1"
+	embed "org.apache.logging.log4j:log4j-core:2.13.1"
     testImplementation 'junit:junit:4.12'
+}
+
+jar {
+
+    configurations.embed.each { dep ->
+        from(project.zipTree(dep)) {
+            exclude 'META-INF', 'META-INF/**'
+        }
+    }
+    manifest {
+        attributes(
+                'Main-Class': mainClassName
+        )
+    }
 }

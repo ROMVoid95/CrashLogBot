@@ -44,7 +44,7 @@ It is always best to discuss your plans beforehand, to ensure that your contribu
 Thanks for your contributions!
 
 ### Commit messages
-Your commit messages ideally can answer two questions: what changed and why. The subject line should feature the â€œwhatâ€ and the body of the commit should describe the â€œwhyâ€.  
+Your commit messages ideally can answer two questions: what changed and why. The subject line should feature the “what” and the body of the commit should describe the “why”.  
 
 When creating a pull request, its description should reference the corresponding issue id.
 

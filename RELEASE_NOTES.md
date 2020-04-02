@@ -1,2 +1,2 @@
-## 1.0-SNAPSHOT
-*   Created template for new repositories.
+## 1.0.0
+*   First Initial Release
