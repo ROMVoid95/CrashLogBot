@@ -36,6 +36,8 @@ dependencies {
         transitive = true
         exclude module: 'opus-java'
     }
+    
+    embed 'com.jagrosh:jda-utilities:3.0.3'
     embed 'commons-io:commons-io:2.5'
     embed 'com.google.code.gson:gson:2.8.5'
     embed 'org.json:json:20190722'
