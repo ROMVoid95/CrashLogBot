@@ -32,6 +32,7 @@ import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.romvoid.crashbot.commands.GithubCommand;
 import net.romvoid.crashbot.commands.InviteCommand;
@@ -57,7 +58,7 @@ public class Bot {
 	private CommandManager commandManager;
 
 	/** The Constant CONFIG_KEYS. */
-	private static final String[] CONFIG_KEYS = { "token" };
+	private static final String[] CONFIG_KEYS = { "token", "prefix" };
 
 	/** The configuration. */
 	private final Configuration configuration;
@@ -81,7 +82,7 @@ public class Bot {
 			}
 		}
 		commandManager = new CommandManager();
-		prefix = "!";
+		prefix = instance.configuration.getString("prefix");
 		installCommands();
 		initJDA();
 	}
@@ -107,6 +108,7 @@ public class Bot {
 		JDABuilder builder = new JDABuilder(AccountType.BOT);
 		builder.setToken(instance.configuration.getString("token"));
 		builder.setStatus(OnlineStatus.DO_NOT_DISTURB);
+		builder.setActivity(Activity.playing("Galacticraft"));
 		builder.addEventListeners(new MessageListener(), new FileListener());
 
 		try {
@@ -114,7 +116,6 @@ public class Bot {
 		} catch (LoginException e) {
 			e.printStackTrace();
 		}
-
 		getJDA().getPresence().setStatus(OnlineStatus.ONLINE);
 		getJDA().setAutoReconnect(true);
 	}
@@ -136,7 +137,8 @@ public class Bot {
 	public void handleCommandEvent(GuildMessageReceivedEvent event) {
 		// If the event message is, e.g. !cmd testing testing, commandName is set to
 		// "cmd"
-		String commandName = event.getMessage().getContentRaw().substring(1).split(" ")[0].toLowerCase();
+		String prefix = getPrefix();
+		String commandName = event.getMessage().getContentRaw().substring(prefix.length()).split(" ")[0].toLowerCase();
 		commandManager.handleCommand(commandName, event);
 	}
 
