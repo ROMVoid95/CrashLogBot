@@ -22,10 +22,10 @@
  */
 package net.romvoid.crashbot;
 
+import javax.annotation.Nonnull;
+
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-
-import javax.annotation.Nonnull;
 
 /**
  * The listener interface for receiving message events.

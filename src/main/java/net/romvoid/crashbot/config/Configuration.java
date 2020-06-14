@@ -48,7 +48,6 @@ public class Configuration {
 
         this.file = file;
         String cont = null;
-        jsonParser = new JsonParser();
 
         try {
             if (file.exists()) {
@@ -62,7 +61,7 @@ public class Configuration {
         if (cont == null || cont.equals("")) {
             cont = "{}";
         }
-        json = jsonParser.parse(cont).getAsJsonObject();
+        json = JsonParser.parseString(cont).getAsJsonObject();
         
     }
 

@@ -41,7 +41,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -52,8 +51,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
  */
 public class FileListener extends ListenerAdapter {
 	private static StringBuilder builder = new StringBuilder();
-	private static String hasteString = Hastebin.paste(builder.toString());
-	private static String hasteString2;
+	private static String hasteString;
 	private static URI url;
 	static final Map<String, String> cache = new HashMap<>();
 
@@ -147,7 +145,6 @@ public class FileListener extends ListenerAdapter {
 		TextChannel channel = event.getTextChannel();
 		Message message = event.getMessage();
 		String name = event.getMessage().getAttachments().get(0).getFileName();
-		String u = message.getAuthor().getAsMention();
 		event.getMessage().getAttachments().get(0).retrieveInputStream().thenAccept(in -> {
 			builder = new StringBuilder();
 			byte[] buf = new byte[1024];
@@ -164,7 +161,8 @@ public class FileListener extends ListenerAdapter {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			hasteString2 = Hastebin.paste(builder.toString());
+			hasteString = Hastebin.paste(builder.toString());
+			System.out.println(hasteString);
 			try {
 				url = new URI(hasteString + ".yml");
 				sendEmbed(channel, makeEmbed(channel, message, name, url));
@@ -184,7 +182,7 @@ public class FileListener extends ListenerAdapter {
 	}
 
 	public static boolean find(URI url, String entry) {
-		String id = hasteString2.replace(Hastebin.getPasteURL(), "");
+		String id = hasteString.replace(Hastebin.getPasteURL(), "");
 		String URLString = Hastebin.getPasteURL() + "raw/" + id + "/";
 		boolean result = false;
 		try {
@@ -211,7 +209,7 @@ public class FileListener extends ListenerAdapter {
 		try {
 			BufferedReader s = new BufferedReader(new FileReader("finders/" + finder));
 			finders = s.readLine().split(";;");
-			;
+			s.close();
 		} catch (IOException e) {
 			System.err.println("Could not load caches!\n" + e.getMessage());
 		}
