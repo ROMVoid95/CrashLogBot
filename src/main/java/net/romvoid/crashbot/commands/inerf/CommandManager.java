@@ -66,6 +66,7 @@ public class CommandManager {
 				paramList = new ArrayList<>(Arrays.asList(params.split(" ")));
 			}
 			command.executeAndHandle(event, paramList, null, null);
+			System.out.println(paramList);
 		});
 	}
 

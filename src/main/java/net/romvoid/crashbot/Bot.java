@@ -34,10 +34,6 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.romvoid.crashbot.commands.GithubCommand;
-import net.romvoid.crashbot.commands.InviteCommand;
-import net.romvoid.crashbot.commands.LatencyCommand;
-import net.romvoid.crashbot.commands.inerf.Command;
 import net.romvoid.crashbot.commands.inerf.CommandManager;
 import net.romvoid.crashbot.config.Configuration;
 import net.romvoid.crashbot.config.Setup;
@@ -59,6 +55,7 @@ public class Bot {
 
 	/** The configuration. */
 	private final Configuration configuration;
+	
 
 	/** The prefix. */
 	private static String prefix;

@@ -42,6 +42,7 @@ public class Configuration {
     private File file;
     private JsonObject json;
     public JsonParser jsonParser;
+    
 
     public Configuration(final File file) {
 

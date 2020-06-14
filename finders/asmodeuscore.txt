@@ -1,0 +1,1 @@
+asmodeuscore.core.astronomy.BodiesHelper.registerSolarSystem;;Please downgrade the mod AsmodeusCore to 0.0.15
