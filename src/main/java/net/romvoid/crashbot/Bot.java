@@ -43,9 +43,6 @@ import net.romvoid.crashbot.config.Configuration;
 import net.romvoid.crashbot.config.Setup;
 import net.romvoid.crashbot.hastebin.FileListener;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 /**
  * The Main Bot Class.
  */
@@ -66,8 +63,6 @@ public class Bot {
 	/** The prefix. */
 	private static String prefix;
 
-	/** The Constant LOGGER. */
-	public static final Logger LOGGER = LogManager.getLogger(Bot.class);
 
 	/**
 	 * Instantiates a new bot.
@@ -83,7 +78,6 @@ public class Bot {
 		}
 		commandManager = new CommandManager();
 		prefix = instance.configuration.getString("prefix");
-		installCommands();
 		initJDA();
 	}
 
@@ -121,15 +115,6 @@ public class Bot {
 	}
 
 	/**
-	 * Install commands.
-	 */
-	private void installCommands() {
-		commandManager.register(new LatencyCommand());
-		commandManager.register(new GithubCommand());
-		commandManager.register(new InviteCommand());
-	}
-
-	/**
 	 * Handle command event.
 	 *
 	 * @param event the event
@@ -160,16 +145,6 @@ public class Bot {
 	 */
 	public String getPrefix() {
 		return prefix;
-	}
-
-	/**
-	 * Register command.
-	 *
-	 * @param command the command
-	 */
-	public Bot registerCommand(Command command) {
-		commandManager.register(command);
-		return this;
 	}
 
 	/**

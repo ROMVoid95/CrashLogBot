@@ -1,18 +1,10 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.2'
-        classpath 'com.github.ben-manes:gradle-versions-plugin:0.28.0'
-    }
-}
-
-apply plugin: 'java'
-apply plugin: 'application'
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'com.github.ben-manes.versions'
-
+plugins {
+	id 'application'
+	id 'java'
+	id "com.github.ben-manes.versions" version "0.28.0"
+	id "com.github.johnrengelman.shadow" version "5.2.0"
+  }
+  
 mainClassName = 'net.romvoid.crashbot.Bot'
 group = 'net.romvoid.crashbot'
 version = '1.0.2'
@@ -20,8 +12,7 @@ version = '1.0.2'
 description = 'A Minecraft logs Discord Bot'
 
 configurations {
-    embed
-    compile.extendsFrom(embed)
+    compile
 }
 
 repositories {
@@ -32,23 +23,27 @@ repositories {
 }
 
 dependencies {
-    embed ('net.dv8tion:JDA:4.1.1_101'){
+    compile ('net.dv8tion:JDA:4.1.1_164'){
         transitive = true
         exclude module: 'opus-java'
     }
     
-    embed 'com.jagrosh:jda-utilities:3.0.3'
-    embed 'commons-io:commons-io:2.5'
-    embed 'com.google.code.gson:gson:2.8.5'
-    embed 'org.json:json:20190722'
-	embed "org.apache.logging.log4j:log4j-api:2.13.1"
-	embed "org.apache.logging.log4j:log4j-core:2.13.1"
-    testImplementation 'junit:junit:4.12'
+    compile 'com.jagrosh:jda-utilities:3.0.4'
+    compile 'commons-io:commons-io:2.5'
+    compile 'com.google.code.gson:gson:2.8.5'
+    compile 'org.json:json:20190722'
+	compile 'org.slf4j:slf4j-api:1.7.25'
+	compile 'ch.qos.logback:logback-classic:1.2.3'
+	compile 'org.reflections:reflections:0.9.11'
+}
+
+shadowJar { task ->
+	baseName = task.project.name + task.project.version
 }
 
 jar {
 
-    configurations.embed.each { dep ->
+    configurations.compile.each { dep ->
         from(project.zipTree(dep)) {
             exclude 'META-INF', 'META-INF/**'
         }

@@ -22,75 +22,96 @@
  */
 package net.romvoid.crashbot.commands.inerf;
 
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-import java.util.*;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.romvoid.crashbot.utilities.ReflectUtil;
 
 /**
  * The Class CommandManager.
  */
 public class CommandManager {
 
-    /** The commands. */
-    private Map<String, Command> commands;
+	/** The commands. */
+	private Map<String, Command> commands;
 
-    /**
-     * Instantiates a new command manager.
-     */
-    public CommandManager() {
-        commands = new HashMap<>();
-    }
+	/**
+	 * Instantiates a new command manager.
+	 */
+	public CommandManager() {
+		commands = new HashMap<>();
+		getCmds();
+	}
 
-    /**
-     * Handle command.
-     *
-     * @param commandName the command name
-     * @param event the event
-     */
-    public void handleCommand(String commandName, GuildMessageReceivedEvent event) {
-        Optional<Command> commandOptional = commandFromName(commandName);
+	/**
+	 * Handle command.
+	 *
+	 * @param commandName the command name
+	 * @param event       the event
+	 */
+	public void handleCommand(String commandName, GuildMessageReceivedEvent event) {
+		Optional<Command> commandOptional = commandFromName(commandName);
 
-        // Adds any space separated strings to the parameter list
-        commandOptional.ifPresent(command -> {
-            String[] tokens = event.getMessage().getContentRaw().substring(1).toLowerCase().split(" ", 2);
-            List<String> paramList = new ArrayList<>();
-            if(hasParams(tokens)) {
-                final String params = tokens[1].trim();
-                paramList = new ArrayList<>(Arrays.asList(params.split(" ")));
-            }
-            command.executeAndHandle(event, paramList, null, null);
-        });
-    }
+		// Adds any space separated strings to the parameter list
+		commandOptional.ifPresent(command -> {
+			String[] tokens = event.getMessage().getContentRaw().substring(1).toLowerCase().split(" ", 2);
+			List<String> paramList = new ArrayList<>();
+			if (hasParams(tokens)) {
+				final String params = tokens[1].trim();
+				paramList = new ArrayList<>(Arrays.asList(params.split(" ")));
+			}
+			command.executeAndHandle(event, paramList, null, null);
+		});
+	}
 
-    /**
-     * Register.
-     *
-     * @param command the command
-     */
-    public void register(Command command) {
-        commands.put(command.getName().toLowerCase(), command);
+	private void getCmds() {
+		for (Class<? extends Command> clazz : ReflectUtil.getCommandClasses()) {
+			register(clazz);
+		}
+	}
 
-        for(String alias : command.getAliases())
-            commands.put(alias.toLowerCase(), command);
-    }
+	/**
+	 * Register.
+	 *
+	 * @param clazz the command
+	 */
+	public void register(Class<? extends Command> clazz) {
+		Command command;
+		try {
+			command = clazz.newInstance();
 
-    /**
-     * Checks for params.
-     *
-     * @param tokens the tokens
-     * @return true, if successful
-     */
-    private boolean hasParams(String[] tokens) {
-        return tokens.length > 1;
-    }
+			commands.put(command.getName().toLowerCase(), command);
 
-    /**
-     * Command from name.
-     *
-     * @param name the name
-     * @return the optional
-     */
-    public Optional<Command> commandFromName(String name) {
-        return Optional.ofNullable(commands.get(name));
-    }
+			for (String alias : command.getAliases())
+				commands.put(alias.toLowerCase(), command);
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	/**
+	 * Checks for params.
+	 *
+	 * @param tokens the tokens
+	 * @return true, if successful
+	 */
+	private boolean hasParams(String[] tokens) {
+		return tokens.length > 1;
+	}
+
+	/**
+	 * Command from name.
+	 *
+	 * @param name the name
+	 * @return the optional
+	 */
+	public Optional<Command> commandFromName(String name) {
+		return Optional.ofNullable(commands.get(name));
+	}
 }
