@@ -1,0 +1,22 @@
+{
+  "stage": {
+    "testing": {
+      "reply": "reply with this",
+      "find": "look for this"
+    }
+  }
+}{
+  "stage": {
+    "another": {
+      "reply": "reply with this again",
+      "find": "look for this also"
+    }
+  }
+}{
+  "stage": {
+    "andother": {
+      "reply": "reply with this for fuck sake",
+      "find": "look for this and then that"
+    }
+  }
+}

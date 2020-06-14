@@ -37,7 +37,7 @@ public class Hastebin {
 	 * TODO: Create a per-guild config-option to choose a custom URL
 	 * 
 	 * */
-	private static String HASTEBIN_SERVER = "https://hasteb.in/"; // requires trailing slash
+	private static String HASTEBIN_SERVER = "https://haste.romvoid.dev/"; // requires trailing slash
 	
     /**
      * A simple implementation of the Hastebin Client API, allowing data to be pasted online for

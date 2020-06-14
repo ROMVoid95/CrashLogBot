@@ -165,7 +165,6 @@ public class FileListener extends ListenerAdapter {
 				e.printStackTrace();
 			}
 			hasteString2 = Hastebin.paste(builder.toString());
-			System.out.println(hasteString2);
 			try {
 				url = new URI(hasteString + ".yml");
 				sendEmbed(channel, makeEmbed(channel, message, name, url));
@@ -187,7 +186,6 @@ public class FileListener extends ListenerAdapter {
 	public static boolean find(URI url, String entry) {
 		String id = hasteString2.replace(Hastebin.getPasteURL(), "");
 		String URLString = Hastebin.getPasteURL() + "raw/" + id + "/";
-		System.out.println(URLString);
 		boolean result = false;
 		try {
 			URL URL = new URL(URLString);
