@@ -13,12 +13,6 @@
       "keys": [
         "java.lang.NoSuchMethodError micdoodle8.mods.galacticraft.core.energy.tile.TileBaseElectricBlockWithInventory"
       ]
-    },
-    {
-      "message": "Downgrade AsmodeusCore to 0.0.15",
-      "keys": [
-        "Caused by: java.lang.NoSuchMethodError: asmodeuscore.core.astronomy.BodiesHelper.registerSolarSystem"
-      ]
     }
   ]
 }
