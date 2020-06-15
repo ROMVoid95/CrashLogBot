@@ -1,0 +1,24 @@
+{
+  "errors": [
+    {
+      "message": "You seem it have downloaded Galacticraft from an invalid site",
+      "keys": [
+        "Galacticraft-Mod-1.12",
+        "Galacticraft-Planets-Mod-1.12",
+        "MicdoodleCore-1.12"
+      ]
+    },
+    {
+      "message": "",
+      "keys": [
+        "java.lang.NoSuchMethodError micdoodle8.mods.galacticraft.core.energy.tile.TileBaseElectricBlockWithInventory"
+      ]
+    },
+    {
+      "message": "Downgrade AsmodeusCore to 0.0.15",
+      "keys": [
+        "Caused by: java.lang.NoSuchMethodError: asmodeuscore.core.astronomy.BodiesHelper.registerSolarSystem"
+      ]
+    }
+  ]
+}
