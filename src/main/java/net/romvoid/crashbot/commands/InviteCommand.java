@@ -20,16 +20,23 @@ public class InviteCommand extends Command {
 	}
 
 	@Override
-	public void executeAndHandle(GuildMessageReceivedEvent event, List<String> params, User author,
-			Message inputMessage) {
+	public void executeAndHandle(GuildMessageReceivedEvent event, List<String> params, User author, Message inputMessage) {
 		MessageChannel channel = event.getChannel();
 		String inviteURL = Bot.getJDA().getInviteUrl() + "&permissions=388177";
-
-		EmbedBuilder embed = EmbedUtil.embed("Invite Me To Your Server",
-				"Want to use this bot in your server also? No problem! heres your invite link");
-		embed.addField("Invite Link", "[Invite Me](" + inviteURL + ")", false);
-		Message msg = EmbedUtil.message(embed);
-		EmbedUtil.sendAndDeleteOnGuilds(channel, msg, 2, TimeUnit.MINUTES);
+		if (params.size() == 1) {
+			String specialInvite = inviteURL + "&guild_id=" + params.get(0);
+			EmbedBuilder embed = EmbedUtil.embed("Invite Me To Your Server", "Want to use this bot in your server also? No problem! heres your invite link");
+			embed.addField("Here is your direct link to invite the bot", "[Invite Me](" + specialInvite + ")", false);
+			Message msg = EmbedUtil.message(embed);
+			EmbedUtil.sendAndDeleteOnGuilds(channel, msg, 2, TimeUnit.MINUTES);
+		} else {
+			EmbedBuilder embed = EmbedUtil.embed("Invite Me To Your Server", "Want to use this bot in your server also? No problem! heres your invite link");
+			embed.addField("Invite Link", "[Invite Me](" + inviteURL + ")", false);
+			Message msg = EmbedUtil.message(embed);
+			EmbedUtil.sendAndDeleteOnGuilds(channel, msg, 2, TimeUnit.MINUTES);
+		} 
+		event.getMessage().delete().queue();
+		
 
 	}
 

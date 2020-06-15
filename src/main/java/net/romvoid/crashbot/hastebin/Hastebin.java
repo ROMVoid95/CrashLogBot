@@ -48,10 +48,12 @@ public class Hastebin {
      */
     public synchronized static String paste(String urlParameters) {
         HttpURLConnection connection = null;
+        
         try {
             //Create connection
             URL url = new URL(HASTEBIN_SERVER + "documents");
             connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestMethod("POST");
             connection.setDoInput(true);
             connection.setDoOutput(true);
@@ -64,7 +66,10 @@ public class Hastebin {
 
             //Get Response
             BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            return HASTEBIN_SERVER + new JSONObject(rd.readLine()).getString("key");
+            JSONObject object = new JSONObject(rd.readLine());
+            String[] out = object.toString().replace("{", "").replace("}", "").replace("\"", "").split(":");
+            String output = HASTEBIN_SERVER + out[1];
+            return output;
 
         } catch (IOException e) {
             return null;

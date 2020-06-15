@@ -24,6 +24,7 @@ package net.romvoid.crashbot.hastebin;
 
 import java.awt.Color;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -33,6 +34,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,8 +105,8 @@ public class FileListener extends ListenerAdapter {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 		embedBuilder.setColor(Color.cyan);
 		embedBuilder.setTitle("Crash Report Utility");
-		embedBuilder.setFooter("Crash-Log Uploading Service for " + channel.getGuild().getName());
 		embedBuilder.addField(user + "'s Crash Log", "[" + filename + "](" + url + ")", false);
+		embedBuilder.setFooter("Links do not expire\nCrash-Log Uploading Service for " + channel.getGuild().getName());
 		embedBuilder.setTimestamp(Instant.now());
 		return embedBuilder;
 
@@ -119,18 +121,19 @@ public class FileListener extends ListenerAdapter {
 	 * @param url      the URL
 	 * @return the embed builder
 	 */
-	private static EmbedBuilder makeEmbedWithSolution() {
+	private static EmbedBuilder makeEmbedWithSolution(String fix) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 		embedBuilder.setColor(Color.yellow);
-		embedBuilder.addField(EmbedBuilder.ZERO_WIDTH_SPACE, "__**Possible Solutions Found**__\n\n" +
-		"Downgrade **AsmodeusCore** from **0.0.16** -> **0.0.15**", false);
+		embedBuilder.setTitle("Possible Solutions Found");
+		embedBuilder.setDescription("`" + fix + "`");
+		embedBuilder.setFooter("Solutions are provided on a best attempt basis and are not guaranteed to work everytime\nAuthor: ROM#0590");
 		return embedBuilder;
 	}
-	
+
 	public static void sendEmbed(TextChannel channel, EmbedBuilder embed) {
 		channel.sendMessage(embed.build()).queue();
 	}
-	
+
 	public static void sendPing(TextChannel channel, String asMention) {
 		channel.sendMessage(asMention).queue();
 	}
@@ -167,9 +170,9 @@ public class FileListener extends ListenerAdapter {
 				url = new URI(hasteString + ".yml");
 				sendEmbed(channel, makeEmbed(channel, message, name, url));
 
-				String[] f = getFinder("asmodeuscore.txt");
+				String[] f = getFinder();
 				if (find(url, f[0])) {
-					sendEmbed(channel, makeEmbedWithSolution());
+					sendEmbed(channel, makeEmbedWithSolution(f[1]));
 				}
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
@@ -204,15 +207,21 @@ public class FileListener extends ListenerAdapter {
 		return result;
 	}
 
-	private static String[] getFinder(String finder) {
-		String[] finders = null;
-		try {
-			BufferedReader s = new BufferedReader(new FileReader("finders/" + finder));
-			finders = s.readLine().split(";;");
-			s.close();
-		} catch (IOException e) {
-			System.err.println("Could not load caches!\n" + e.getMessage());
+	private static String[] getFinder() {
+		File folder = new File("finders/");
+		List<File> files = new ArrayList<File>(Arrays.asList(folder.listFiles()));
+		if (!files.isEmpty()) {
+			for (File file : files) {
+				try {
+					BufferedReader s = new BufferedReader(new FileReader(file));
+					String[] finders = s.readLine().split(";;");
+					s.close();
+					return finders;
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 		}
-		return finders;
+		return null;
 	}
 }
