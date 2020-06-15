@@ -28,12 +28,12 @@ import java.util.Date;
 
 import javax.security.auth.login.LoginException;
 
-import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.internal.JDAImpl;
 import net.romvoid.crashbot.commands.inerf.CommandManager;
 import net.romvoid.crashbot.config.Configuration;
 import net.romvoid.crashbot.config.Setup;
@@ -45,7 +45,7 @@ import net.romvoid.crashbot.hastebin.FileListener;
 public class Bot {
 
 	private static Bot instance;
-	private JDA jda;
+	private JDAImpl jda;
 	private static final SimpleDateFormat timeStampFormatter = new SimpleDateFormat("MM.dd.yyyy HH:mm:ss");
 	/** The command manager. */
 	private CommandManager commandManager;
@@ -76,6 +76,7 @@ public class Bot {
 		commandManager = new CommandManager();
 		prefix = instance.configuration.getString("prefix");
 		initJDA();
+		setStatus(OnlineStatus.ONLINE);
 	}
 
 	/**
@@ -95,20 +96,23 @@ public class Bot {
 	public static void initJDA() {
 		if (instance == null)
 			throw new NullPointerException("CrashBot has not been initialized yet.");
-
-		JDABuilder builder = new JDABuilder(AccountType.BOT);
-		builder.setToken(instance.configuration.getString("token"));
-		builder.setStatus(OnlineStatus.DO_NOT_DISTURB);
-		builder.setActivity(Activity.playing("Galacticraft"));
-		builder.addEventListeners(new MessageListener(), new FileListener());
-
+		
 		try {
-			instance.jda = builder.build();
+			JDABuilder.createDefault(instance.configuration.getString("token"))
+			.setStatus(OnlineStatus.DO_NOT_DISTURB)
+			.setActivity(Activity.playing("Galacticraft").asRichPresence())
+			.addEventListeners(new MessageListener(), new FileListener())
+			.build();
 		} catch (LoginException e) {
 			e.printStackTrace();
 		}
-		getJDA().getPresence().setStatus(OnlineStatus.ONLINE);
-		getJDA().setAutoReconnect(true);
+
+	}
+	
+	private static void setStatus(OnlineStatus status) {
+		if(getJDA().getStatus().isInit()) {
+			getJDA().getPresence().setStatus(status);
+		}
 	}
 
 	/**
@@ -158,7 +162,7 @@ public class Bot {
 	 *
 	 * @return the JDA Instance
 	 */
-	public static JDA getJDA() {
+	public static JDAImpl getJDA() {
 		return instance == null ? null : instance.jda;
 	}
 	
