@@ -82,13 +82,22 @@ public class FileListener extends ListenerAdapter {
 	 */
 	private static boolean isValidFile(Message.Attachment attachment) {
 		String[] cancelWords = { "txt", "log" };
+		String[] fileNames = { "crash-*-client", "latest" };
+		boolean finalFound = false;
 		boolean found = false;
+		boolean fileNameFound = false;
 		for (String cancelWord : cancelWords) {
 			found = attachment.getFileExtension().equals(cancelWord);
 			if (found)
 				break;
+			for (String names : fileNames) {
+				fileNameFound = attachment.getFileName().contains(names);
+				if (fileNameFound)
+					break;
+			}
+			finalFound = (fileNameFound && found) ? true : false;
 		}
-		return found;
+		return finalFound;
 	}
 
 	/**

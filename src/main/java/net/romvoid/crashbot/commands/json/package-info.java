@@ -1,0 +1,1 @@
+package net.romvoid.crashbot.commands.json;
