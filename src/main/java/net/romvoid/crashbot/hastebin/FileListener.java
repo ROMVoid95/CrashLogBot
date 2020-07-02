@@ -23,18 +23,11 @@
 package net.romvoid.crashbot.hastebin;
 
 import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +38,7 @@ import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.romvoid.crashbot.utilities.FinderUtils;
 
 /**
  * The listener interface for receiving file events. The class that is interested in processing a file event implements this interface, and the object created with that class is registered with a component using the component's <code>addFileListener<code> method. When the file event occurs, that object's appropriate method is invoked.
@@ -64,13 +58,21 @@ public class FileListener extends ListenerAdapter {
 	 */
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
+		if(event.getAuthor().isBot())
+			return;
+		System.out.println("Message Detected - Checking for Attachments");
 		List<Attachment> list = new ArrayList<Attachment>();
 		list.addAll(event.getMessage().getAttachments());
-		list.forEach(ee -> {
-			if (isValidFile(ee)) {
-				getFileContent(event);
-			}
-		});
+		if(!list.isEmpty()) {
+			System.out.println("Message Contains Attachment - Checking if Valid File");
+			list.forEach(ee -> {
+				if (isValidFile(ee)) {
+					System.out.println("Message File is Valid");
+					getFileContent(event);
+				}
+			});
+		}
+
 
 	}
 
@@ -80,7 +82,7 @@ public class FileListener extends ListenerAdapter {
 	 * @param attachment the attachment
 	 * @return true, if is valid file
 	 */
-	private static boolean isValidFile(Message.Attachment attachment) {
+	private static boolean isValidFile(Attachment attachment) {
 		String[] cancelWords = { "txt", "log" };
 		boolean found = false;
 		for (String cancelWord : cancelWords) {
@@ -165,15 +167,13 @@ public class FileListener extends ListenerAdapter {
 				e.printStackTrace();
 			}
 			hasteString = Hastebin.paste(builder.toString());
-			System.out.println(hasteString);
 			try {
 				url = new URI(hasteString + ".yml");
 				sendEmbed(channel, makeEmbed(channel, message, name, url));
-
-				String[] f = getFinder();
-				if (find(url, f[0])) {
-					sendEmbed(channel, makeEmbedWithSolution(f[1]));
-				}
+				FinderUtils.finderSet.forEach((key, value) -> {
+					if (FinderUtils.find(hasteString, url, key))
+						sendEmbed(channel, makeEmbedWithSolution(value));
+				});
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
 			}
@@ -184,44 +184,5 @@ public class FileListener extends ListenerAdapter {
 		});
 	}
 
-	public static boolean find(URI url, String entry) {
-		String id = hasteString.replace(Hastebin.getPasteURL(), "");
-		String URLString = Hastebin.getPasteURL() + "raw/" + id + "/";
-		boolean result = false;
-		try {
-			URL URL = new URL(URLString);
-			HttpURLConnection connection = (HttpURLConnection) URL.openConnection();
-			connection.setDoOutput(true);
-			connection.setConnectTimeout(10000);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				if (line.contains(entry)) {
-					return true;
-				}
-			}
-			reader.close();
-		} catch (IOException e) {
 
-		}
-		return result;
-	}
-
-	private static String[] getFinder() {
-		File folder = new File("finders/");
-		List<File> files = new ArrayList<File>(Arrays.asList(folder.listFiles()));
-		if (!files.isEmpty()) {
-			for (File file : files) {
-				try {
-					BufferedReader s = new BufferedReader(new FileReader(file));
-					String[] finders = s.readLine().split(";;");
-					s.close();
-					return finders;
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return null;
-	}
 }

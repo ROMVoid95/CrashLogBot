@@ -11,9 +11,8 @@ version = '1.0.2'
 
 description = 'A Minecraft logs Discord Bot'
 
-configurations {
-    compile
-}
+sourceCompatibility = targetCompatibility = 1.8
+compileJava.options.encoding = 'UTF-8'
 
 repositories {
     maven {
@@ -54,20 +53,7 @@ dependencies {
 
 }
 
-shadowJar { task ->
-	baseName = task.project.name + task.project.version
-}
-
-jar {
-
-    configurations.compile.each { dep ->
-        from(project.zipTree(dep)) {
-            exclude 'META-INF', 'META-INF/**'
-        }
-    }
-    manifest {
-        attributes(
-                'Main-Class': mainClassName
-        )
-    }
+shadowJar {
+   baseName = 'crashlogbot'
+   archiveVersion = version
 }

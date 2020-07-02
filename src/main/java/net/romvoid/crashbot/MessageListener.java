@@ -63,6 +63,6 @@ public class MessageListener extends ListenerAdapter {
      * @return true, if successful
      */
     private boolean messageContainsPrefix(GuildMessageReceivedEvent event) {
-        return event.getMessage().getContentRaw().startsWith(Bot.getInstance().getPrefix());
+        return event.getMessage().getContentRaw().startsWith(Bot.getPrefix());
     }
 }
