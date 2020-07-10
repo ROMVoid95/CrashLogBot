@@ -22,58 +22,57 @@
  */
 package net.romvoid.crashbot;
 
+import static net.dv8tion.jda.api.requests.GatewayIntent.GUILD_MEMBERS;
+import static net.dv8tion.jda.api.requests.GatewayIntent.GUILD_MESSAGES;
+import static net.dv8tion.jda.api.requests.GatewayIntent.GUILD_PRESENCES;
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.security.auth.login.LoginException;
 
-import net.dv8tion.jda.api.JDA;
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandClientBuilder;
+import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
-import net.dv8tion.jda.api.sharding.ShardManager;
-import net.dv8tion.jda.api.utils.ChunkingFilter;
-import net.dv8tion.jda.api.utils.Compression;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import net.romvoid.crashbot.commands.inerf.CommandManager;
+import net.dv8tion.jda.internal.JDAImpl;
+import net.romvoid.crashbot.commands.GithubCommand;
+import net.romvoid.crashbot.commands.InviteCommand;
 import net.romvoid.crashbot.config.Configuration;
 import net.romvoid.crashbot.config.Setup;
 import net.romvoid.crashbot.hastebin.FileListener;
-import net.romvoid.crashbot.utilities.FinderUtils;
 
 /**
  * The Main Bot Class.
  */
 public class Bot {
 
+	
 	private static Bot instance;
-	private JDA jda;
+	private JDAImpl jda;
 	private static final SimpleDateFormat timeStampFormatter = new SimpleDateFormat("MM.dd.yyyy HH:mm:ss");
-	/** The command manager. */
-	private CommandManager commandManager;
-
 	/** The Constant CONFIG_KEYS. */
 	private static final String[] CONFIG_KEYS = { "token", "prefix" };
 
 	/** The configuration. */
 	private final Configuration configuration;
+	
+	private static EventWaiter waiter;
+	
+	public static CommandClientBuilder client;
 
 	/** The prefix. */
 	private static String prefix;
-
-	/**
-	 * The main method.
-	 *
-	 * @param args the arguments
-	 */
-	public static void main(String[] args) {
-		if (instance != null)
-			throw new RuntimeException("CrashBot has already been initialized in this VM.");
-		new Bot();
-	}
+	
+	private static Set<GatewayIntent> intents = new HashSet<>();
 
 	/**
 	 * Instantiates a new bot.
@@ -87,39 +86,55 @@ public class Bot {
 				configuration.set(configKey, input);
 			}
 		}
-		commandManager = new CommandManager();
+
 		prefix = instance.configuration.getString("prefix");
-		new FinderUtils();
+		setIntents();
+		client = new CommandClientBuilder();
+		waiter = new EventWaiter();
+		client.setOwnerId("393847930039173131");
+		client.setEmojis("\uD83D\uDE03", "\uD83D\uDE2E", "\uD83D\uDE26");
+		client.setPrefix(prefix);
+
+		client.addCommands(new GithubCommand(), new InviteCommand());
 		initJDA();
 
 	}
-	
-	  public static void initJDA() {
-		    if (instance == null)
-		      throw new NullPointerException("CrashBot has not been initialized yet.");
-		    JDABuilder builder = JDABuilder.createDefault(instance.configuration.getString("token"));
-			builder.setBulkDeleteSplittingEnabled(false);
-			builder.setActivity(Activity.watching("TV"));
-			configureMemoryUsage(builder);
-			builder.addEventListeners(new MessageListener(), new FileListener());
-		    try {
-		        instance.jda = builder.build();
-		      } catch (LoginException e) {
-		        e.printStackTrace();
-		      } 
-	  }
 
-	public static void configureMemoryUsage(JDABuilder builder) {
-		// Disable cache for member activities
-		builder.disableCache(CacheFlag.ACTIVITY);
-		// Disable presence updates and typing events
-		builder.disableIntents(GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGE_TYPING);
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 */
+	public static void main(String[] args) {
+		if (instance != null)
+			throw new RuntimeException("CrashBot has already been initialized in this VM.");
+		new Bot();
 	}
 
-	public void handleCommandEvent(GuildMessageReceivedEvent event) {
-		String prefix = getPrefix();
-		String commandName = event.getMessage().getContentRaw().substring(prefix.length()).split(" ")[0].toLowerCase();
-		this.commandManager.handleCommand(commandName, event);
+	/**
+	 * Initiates the JDA Instance and builder.
+	 */
+	public static void initJDA() {
+		if (instance == null)
+			throw new NullPointerException("CrashBot has not been initialized yet.");
+		
+		try {
+			instance.jda = (JDAImpl) JDABuilder.create(instance.configuration.getString("token"), intents)
+			.setStatus(OnlineStatus.DO_NOT_DISTURB)
+			.setActivity(Activity.playing("Galacticraft").asRichPresence())
+			.addEventListeners(waiter, client.build(), new FileListener())
+			.disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOTE)
+			.build();
+		} catch (LoginException e) {
+			e.printStackTrace();
+		}
+		getJDA().getPresence().setStatus(OnlineStatus.ONLINE);
+	}
+	
+	private void setIntents() {
+		intents.add(GUILD_MESSAGES);
+		intents.add(GUILD_MEMBERS);
+		intents.add(GUILD_PRESENCES);
 	}
 
 	/**
@@ -138,7 +153,7 @@ public class Bot {
 	 *
 	 * @return the prefix
 	 */
-	public static String getPrefix() {
+	public String getPrefix() {
 		return prefix;
 	}
 
@@ -156,14 +171,14 @@ public class Bot {
 	 *
 	 * @return the JDA Instance
 	 */
-	public static JDA getJDA() {
+	public static JDAImpl getJDA() {
 		return instance == null ? null : instance.jda;
 	}
-
-	/**
-	 * @return a freshly generated timestamp in the 'dd.MM.yyyy HH:mm:ss' format.
-	 */
-	public static String getNewTimestamp() {
-		return timeStampFormatter.format(new Date());
-	}
+	
+	  /**
+	   * @return a freshly generated timestamp in the 'dd.MM.yyyy HH:mm:ss' format.
+	   */
+	  public static String getNewTimestamp() {
+	    return timeStampFormatter.format(new Date());
+	  }
 }

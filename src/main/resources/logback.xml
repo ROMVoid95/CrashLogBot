@@ -6,7 +6,7 @@
             <level>WARN</level>
         </filter>
         <encoder>
-            <pattern>[%d{HH:mm:ss}] %-10logger{0}: %msg%n</pattern>
+            <pattern>[%d{HH:mm:ss.SSS}] [%-5level] %-10logger{0}: %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -16,17 +16,7 @@
             <level>WARN</level>
         </filter>
         <encoder>
-            <pattern>[%d{HH:mm:ss}] %-10logger{0}: %msg%n</pattern>
-        </encoder>
-    </appender>
-    
-    <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
-        <target>System.out</target>
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>WARN</level>
-        </filter>
-        <encoder>
-            <pattern>[%d{HH:mm:ss}] %-10logger{0}: %msg%n</pattern>
+            <pattern>[%d{HH:mm:ss.SSS}] [%-5level] %-10logger{0}: %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -43,7 +33,7 @@
         </rollingPolicy>
 
         <encoder>
-            <pattern>[%d{HH:mm:ss}] %-10logger{0}: %msg%n</pattern>
+            <pattern>[%d{HH:mm:ss.SSS}] [%-5level] %-10logger{0}: %msg%n</pattern>
         </encoder>
     </appender>
 

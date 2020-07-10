@@ -11,8 +11,9 @@ version = '1.0.2'
 
 description = 'A Minecraft logs Discord Bot'
 
-sourceCompatibility = targetCompatibility = 1.8
-compileJava.options.encoding = 'UTF-8'
+configurations {
+    compile
+}
 
 repositories {
     maven {
@@ -47,13 +48,26 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
 	compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
-
-	// https://mvnrepository.com/artifact/org.reflections/reflections
-	compile group: 'org.reflections', name: 'reflections', version: '0.9.11'
+	
+	// https://search.maven.org/artifact/org.junit.jupiter/junit-jupiter-engine
+	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.7.0-M1'
 
 }
 
-shadowJar {
-   baseName = 'crashlogbot'
-   archiveVersion = version
+shadowJar { task ->
+	baseName = task.project.name + task.project.version
+}
+
+jar {
+
+    configurations.compile.each { dep ->
+        from(project.zipTree(dep)) {
+            exclude 'META-INF', 'META-INF/**'
+        }
+    }
+    manifest {
+        attributes(
+                'Main-Class': mainClassName
+        )
+    }
 }

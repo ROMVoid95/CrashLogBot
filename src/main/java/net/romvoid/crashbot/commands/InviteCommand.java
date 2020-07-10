@@ -1,48 +1,50 @@
 package net.romvoid.crashbot.commands;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.jagrosh.jdautilities.command.Command;
+import com.jagrosh.jdautilities.command.CommandEvent;
+
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.romvoid.crashbot.Bot;
-import net.romvoid.crashbot.commands.inerf.Command;
 import net.romvoid.crashbot.utilities.EmbedUtil;
 
 public class InviteCommand extends Command {
 
 	public InviteCommand() {
-		super("invite");
-		addAlias("inv");
+		this.name = "invite";
+		this.help = "Generates an invite link for the bot";
+		this.guildOnly = false;
 	}
 
 	@Override
-	public void executeAndHandle(GuildMessageReceivedEvent event, List<String> params, User author, Message inputMessage) {
+	protected void execute(CommandEvent event) {
 		MessageChannel channel = event.getChannel();
 		String inviteURL = Bot.getJDA().getInviteUrl() + "&permissions=388177";
-		if (params.size() == 1) {
-			String specialInvite = inviteURL + "&guild_id=" + params.get(0);
-			EmbedBuilder embed = EmbedUtil.embed("Invite Me To Your Server", "Want to use this bot in your server also? No problem! heres your invite link");
-			embed.addField("Here is your direct link to invite the bot", "[Invite Me](" + specialInvite + ")", false);
-			Message msg = EmbedUtil.message(embed);
-			EmbedUtil.sendAndDeleteOnGuilds(channel, msg, 2, TimeUnit.MINUTES);
-		} else {
-			EmbedBuilder embed = EmbedUtil.embed("Invite Me To Your Server", "Want to use this bot in your server also? No problem! heres your invite link");
+		if (event.getArgs().isEmpty()) {
+			EmbedBuilder embed = EmbedUtil.embed("Invite Me To Your Server",
+					"Want to use this bot in your server also? No problem! heres your invite link");
 			embed.addField("Invite Link", "[Invite Me](" + inviteURL + ")", false);
 			Message msg = EmbedUtil.message(embed);
 			EmbedUtil.sendAndDeleteOnGuilds(channel, msg, 2, TimeUnit.MINUTES);
-		} 
+		} else {
+			String[] args = event.getArgs().split("\\s+");
+			if (args.length >= 2) {
+				event.replyWarning("You can only define 1 serverId per command!");
+			} else {
+				String specialInvite = inviteURL + "&guild_id=" + args[0];
+				EmbedBuilder embed = EmbedUtil.embed("Invite Me To Your Server",
+						"Want to use this bot in your server also? No problem! heres your invite link");
+				embed.addField("Here is your direct link to invite the bot", "[Invite Me](" + specialInvite + ")",
+						false);
+				Message msg = EmbedUtil.message(embed);
+				EmbedUtil.sendAndDeleteOnGuilds(channel, msg, 2, TimeUnit.MINUTES);
+			}
+		}
 		event.getMessage().delete().queue();
-		
-
-	}
-
-	@Override
-	public String getDescription() {
-		return "Generates an invite link for the bot";
 	}
 
 }

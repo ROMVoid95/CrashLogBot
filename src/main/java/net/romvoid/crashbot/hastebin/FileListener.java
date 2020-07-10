@@ -22,15 +22,26 @@
  */
 package net.romvoid.crashbot.hastebin;
 
+import static net.romvoid.crashbot.utilities.FileUtil.CRASHLOG;
+import static net.romvoid.crashbot.utilities.FileUtil.LOGS_TXT;
+
 import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
+
+import org.apache.commons.io.FilenameUtils;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -38,10 +49,14 @@ import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.romvoid.crashbot.utilities.FinderUtils;
+import net.romvoid.crashbot.utilities.FileUtil;
 
 /**
- * The listener interface for receiving file events. The class that is interested in processing a file event implements this interface, and the object created with that class is registered with a component using the component's <code>addFileListener<code> method. When the file event occurs, that object's appropriate method is invoked.
+ * The listener interface for receiving file events. The class that is
+ * interested in processing a file event implements this interface, and the
+ * object created with that class is registered with a component using the
+ * component's <code>addFileListener<code> method. When the file event occurs,
+ * that object's appropriate method is invoked.
  *
  * @see FileEvent
  */
@@ -50,6 +65,9 @@ public class FileListener extends ListenerAdapter {
 	private static String hasteString;
 	private static URI url;
 	static final Map<String, String> cache = new HashMap<>();
+	TextChannel channel;
+	Message message;
+	String name;
 
 	/**
 	 * On message received.
@@ -58,39 +76,41 @@ public class FileListener extends ListenerAdapter {
 	 */
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
-		if(event.getAuthor().isBot())
-			return;
-		System.out.println("Message Detected - Checking for Attachments");
 		List<Attachment> list = new ArrayList<Attachment>();
 		list.addAll(event.getMessage().getAttachments());
-		if(!list.isEmpty()) {
-			System.out.println("Message Contains Attachment - Checking if Valid File");
-			list.forEach(ee -> {
-				if (isValidFile(ee)) {
-					System.out.println("Message File is Valid");
-					getFileContent(event);
+		this.message = event.getMessage();
+		this.channel = event.getTextChannel();
+		list.forEach(a -> {
+			this.name = a.getFileName();
+			switch (a.getFileExtension()) {
+			case "txt":
+				if (FileUtil.matchToExt(CRASHLOG, a.getFileName())) {
+					getFileContent(a, event);
 				}
-			});
-		}
-
-
-	}
-
-	/**
-	 * Checks if is valid file. This checks if the file has the extensions .txt or .log which are common Minecraft crash-log and log file extensions.
-	 *
-	 * @param attachment the attachment
-	 * @return true, if is valid file
-	 */
-	private static boolean isValidFile(Attachment attachment) {
-		String[] cancelWords = { "txt", "log" };
-		boolean found = false;
-		for (String cancelWord : cancelWords) {
-			found = attachment.getFileExtension().equals(cancelWord);
-			if (found)
 				break;
-		}
-		return found;
+			case "log":
+				if (FileUtil.matchToExt(LOGS_TXT, a.getFileName())) {
+					getFileContent(a, event);
+				}
+				break;
+			case "finder":
+				if (event.getGuild().getOwnerId().equals(event.getAuthor().getId())) {
+					String out = FilenameUtils.removeExtension(a.getFileName());
+					message.getAttachments().get(0).downloadToFile("finders/" + out)
+							.thenAccept(file -> {
+								event.getMessage().delete().queue();
+								channel.sendMessage(sendFinderAccept().build()).queue();
+							})
+							.exceptionally(t ->
+					         { // handle failure
+					             t.printStackTrace();
+					             return null;
+					         });
+
+				}
+			}
+		});
+
 	}
 
 	/**
@@ -128,7 +148,25 @@ public class FileListener extends ListenerAdapter {
 		embedBuilder.setColor(Color.yellow);
 		embedBuilder.setTitle("Possible Solutions Found");
 		embedBuilder.setDescription("`" + fix + "`");
-		embedBuilder.setFooter("Solutions are provided on a best attempt basis and are not guaranteed to work everytime\nAuthor: ROM#0590");
+		embedBuilder.setFooter(
+				"Solutions are provided on a best attempt basis and are not guaranteed to work everytime\nAuthor: ROM#0590");
+		return embedBuilder;
+	}
+	
+	/**
+	 * Make embed.
+	 *
+	 * @param channel  the channel
+	 * @param message  the message
+	 * @param filename the filename
+	 * @param url      the URL
+	 * @return the embed builder
+	 */
+	private static EmbedBuilder sendFinderAccept() {
+		EmbedBuilder embedBuilder = new EmbedBuilder();
+		embedBuilder.setColor(Color.green);
+		embedBuilder.setTitle("New Finder Added!");
+		embedBuilder.setDescription("Finder has been sucessfully added to the database");
 		return embedBuilder;
 	}
 
@@ -146,11 +184,8 @@ public class FileListener extends ListenerAdapter {
 	 * @param event the onMessageReceived event
 	 * @return the file content
 	 */
-	private static void getFileContent(MessageReceivedEvent event) {
-		TextChannel channel = event.getTextChannel();
-		Message message = event.getMessage();
-		String name = event.getMessage().getAttachments().get(0).getFileName();
-		event.getMessage().getAttachments().get(0).retrieveInputStream().thenAccept(in -> {
+	private void getFileContent(Attachment doc, MessageReceivedEvent event) {
+		doc.retrieveInputStream().thenAccept(in -> {
 			builder = new StringBuilder();
 			byte[] buf = new byte[1024];
 			int count = 0;
@@ -167,13 +202,18 @@ public class FileListener extends ListenerAdapter {
 				e.printStackTrace();
 			}
 			hasteString = Hastebin.paste(builder.toString());
+			System.out.println(hasteString);
 			try {
 				url = new URI(hasteString + ".yml");
 				sendEmbed(channel, makeEmbed(channel, message, name, url));
-				FinderUtils.finderSet.forEach((key, value) -> {
-					if (FinderUtils.find(hasteString, url, key))
-						sendEmbed(channel, makeEmbedWithSolution(value));
-				});
+
+				for (File file : getFiles()) {
+					for (String[] lines : getFinder(file)) {
+						if (find(url, lines[0])) {
+							sendEmbed(channel, makeEmbedWithSolution(lines[1]));
+						}
+					}
+				}
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
 			}
@@ -184,5 +224,57 @@ public class FileListener extends ListenerAdapter {
 		});
 	}
 
+	public static boolean find(URI url, String entry) {
+		String id = hasteString.replace(Hastebin.getPasteURL(), "");
+		String URLString = Hastebin.getPasteURL() + "raw/" + id + "/";
+		boolean result = false;
+		try {
+			URL URL = new URL(URLString);
+			HttpURLConnection connection = (HttpURLConnection) URL.openConnection();
+			connection.setDoOutput(true);
+			connection.setConnectTimeout(10000);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			String line = null;
+			int currentLine = 0;
+			while ((line = reader.readLine()) != null) {
+				currentLine ++;
+				if (line.contains(entry)) {
+					System.out.println("[Line " + currentLine + "] =" + entry);
+					return true;
+				}
+			}
+			reader.close();
+		} catch (IOException e) {
 
+		}
+		return result;
+	}
+
+	private static List<File> getFiles() {
+		File folder = new File("finders/");
+		File[] files = folder.listFiles();
+		List<File> list = new ArrayList<File>();
+		for (File f : files) {
+
+			list.add(f);
+		}
+
+		return list;
+	}
+
+	private static List<String[]> getFinder(File file) {
+		List<String[]> lines = new ArrayList<>();
+		;
+		try {
+			Scanner scanner = new Scanner(file);
+			while (scanner.hasNextLine()) {
+				lines.add(scanner.nextLine().split(";;"));
+			}
+			scanner.close();
+			return lines;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 }
