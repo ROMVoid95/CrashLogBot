@@ -7,7 +7,7 @@ plugins {
   
 mainClassName = 'net.romvoid.crashbot.Bot'
 group = 'net.romvoid.crashbot'
-version = '1.0.2'
+version = '1.1.0'
 
 description = 'A Minecraft logs Discord Bot'
 
@@ -55,7 +55,7 @@ dependencies {
 }
 
 shadowJar { task ->
-	baseName = task.project.name + task.project.version
+	baseName = task.project.name
 }
 
 jar {
