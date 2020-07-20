@@ -34,9 +34,12 @@ import java.util.Set;
 
 import javax.security.auth.login.LoginException;
 
-import com.jagrosh.jdautilities.command.Command;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.jagrosh.jdautilities.command.CommandClientBuilder;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+import com.jagrosh.jdautilities.examples.command.GuildlistCommand;
 
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -55,7 +58,6 @@ import net.romvoid.crashbot.hastebin.FileListener;
  */
 public class Bot {
 
-	
 	private static Bot instance;
 	private JDAImpl jda;
 	private static final SimpleDateFormat timeStampFormatter = new SimpleDateFormat("MM.dd.yyyy HH:mm:ss");
@@ -64,15 +66,17 @@ public class Bot {
 
 	/** The configuration. */
 	private final Configuration configuration;
-	
+
 	private static EventWaiter waiter;
-	
+
 	public static CommandClientBuilder client;
 
 	/** The prefix. */
 	private static String prefix;
-	
+
 	private static Set<GatewayIntent> intents = new HashSet<>();
+
+	public static final Logger LOG = (Logger) LoggerFactory.getLogger(Bot.class);
 
 	/**
 	 * Instantiates a new bot.
@@ -95,7 +99,7 @@ public class Bot {
 		client.setEmojis("\uD83D\uDE03", "\uD83D\uDE2E", "\uD83D\uDE26");
 		client.setPrefix(prefix);
 
-		client.addCommands(new GithubCommand(), new InviteCommand());
+		client.addCommands(new GithubCommand(), new InviteCommand(), new GuildlistCommand(waiter));
 		initJDA();
 
 	}
@@ -117,20 +121,19 @@ public class Bot {
 	public static void initJDA() {
 		if (instance == null)
 			throw new NullPointerException("CrashBot has not been initialized yet.");
-		
+
 		try {
 			instance.jda = (JDAImpl) JDABuilder.create(instance.configuration.getString("token"), intents)
-			.setStatus(OnlineStatus.DO_NOT_DISTURB)
-			.setActivity(Activity.playing("Galacticraft").asRichPresence())
-			.addEventListeners(waiter, client.build(), new FileListener())
-			.disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOTE)
-			.build();
+					.setStatus(OnlineStatus.DO_NOT_DISTURB)
+					.setActivity(Activity.playing("Galacticraft").asRichPresence())
+					.addEventListeners(waiter, client.build(), new FileListener())
+					.disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOTE).build();
 		} catch (LoginException e) {
 			e.printStackTrace();
 		}
 		getJDA().getPresence().setStatus(OnlineStatus.ONLINE);
 	}
-	
+
 	private void setIntents() {
 		intents.add(GUILD_MESSAGES);
 		intents.add(GUILD_MEMBERS);
@@ -174,11 +177,16 @@ public class Bot {
 	public static JDAImpl getJDA() {
 		return instance == null ? null : instance.jda;
 	}
+
+	/**
+	 * @return a freshly generated timestamp in the 'dd.MM.yyyy HH:mm:ss' format.
+	 */
+	public static String getNewTimestamp() {
+		return timeStampFormatter.format(new Date());
+	}
 	
-	  /**
-	   * @return a freshly generated timestamp in the 'dd.MM.yyyy HH:mm:ss' format.
-	   */
-	  public static String getNewTimestamp() {
-	    return timeStampFormatter.format(new Date());
-	  }
+	public static void logMsg(String messageId, String conent) {
+		String msg = "[" + messageId + "] " + conent;
+		Bot.LOG.info(msg);
+	}
 }

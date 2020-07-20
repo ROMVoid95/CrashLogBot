@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.romvoid.crashbot.Bot;
 import net.romvoid.crashbot.utilities.EmbedUtil;
 
 public class GithubCommand extends Command {
@@ -22,12 +23,15 @@ public class GithubCommand extends Command {
 
 	@Override
 	protected void execute(CommandEvent event) {
+		Bot.LOG.info(event.getAuthor().getName() + " invoked command " + this.name);
+		
 		MessageChannel channel = event.getChannel();
 		EmbedBuilder embed = EmbedUtil.embed("CrashBot Github",
 				"Have an issue? Or want to contribute? Head on over to my Github Repo!");
 		embed.addField("Github Link", "[Github Repository](https://github.com/ROMVoid95/CrashBot)", false);
 		Message msg = EmbedUtil.message(embed);
 		EmbedUtil.sendAndDeleteOnGuilds(channel, msg, 2, TimeUnit.MINUTES);
+		event.getMessage().delete().queue();
 	}
 
 }

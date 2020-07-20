@@ -6,7 +6,6 @@ import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.romvoid.crashbot.Bot;
@@ -22,6 +21,7 @@ public class InviteCommand extends Command {
 
 	@Override
 	protected void execute(CommandEvent event) {
+		Bot.LOG.info(event.getAuthor().getName() + " invoked command " + this.name);
 		MessageChannel channel = event.getChannel();
 		String inviteURL = Bot.getJDA().getInviteUrl() + "&permissions=388177";
 		if (event.getArgs().isEmpty()) {

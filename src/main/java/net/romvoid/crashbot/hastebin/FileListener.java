@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -49,7 +50,10 @@ import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.romvoid.crashbot.Bot;
+import net.romvoid.crashbot.utilities.EmbedUtil;
 import net.romvoid.crashbot.utilities.FileUtil;
+import net.romvoid.crashbot.utilities.GithubConnect;
 
 /**
  * The listener interface for receiving file events. The class that is
@@ -65,9 +69,11 @@ public class FileListener extends ListenerAdapter {
 	private static String hasteString;
 	private static URI url;
 	static final Map<String, String> cache = new HashMap<>();
+	String messageId;
 	TextChannel channel;
 	Message message;
 	String name;
+	String author;
 
 	/**
 	 * On message received.
@@ -80,26 +86,38 @@ public class FileListener extends ListenerAdapter {
 		list.addAll(event.getMessage().getAttachments());
 		this.message = event.getMessage();
 		this.channel = event.getTextChannel();
+		this.messageId = event.getMessageId();
+		this.author = event.getAuthor().getAsTag();
 		list.forEach(a -> {
 			this.name = a.getFileName();
 			switch (a.getFileExtension()) {
 			case "txt":
 				if (FileUtil.matchToExt(CRASHLOG, a.getFileName())) {
-					getFileContent(a, event);
+					Bot.logMsg(messageId, author + " submitted " + name);
+					getFileContent(a, event, messageId);
 				}
 				break;
 			case "log":
 				if (FileUtil.matchToExt(LOGS_TXT, a.getFileName())) {
-					getFileContent(a, event);
+					Bot.logMsg(messageId, author + " submitted " + name);
+					getFileContent(a, event, messageId);
 				}
 				break;
 			case "finder":
 				if (event.getGuild().getOwnerId().equals(event.getAuthor().getId())) {
 					String out = FilenameUtils.removeExtension(a.getFileName());
+					
 					message.getAttachments().get(0).downloadToFile("finders/" + out)
 							.thenAccept(file -> {
+								try {
+									GithubConnect.send(file);
+									Bot.logMsg(messageId, "Uploaded Finder [" + out + "] to Github");
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+								Bot.logMsg(messageId, "Added Finder [" + out + "] to database. Submitted by " + author);
 								event.getMessage().delete().queue();
-								channel.sendMessage(sendFinderAccept().build()).queue();
+								EmbedUtil.sendAndDelete(channel, sendFinderAccept(), 15, TimeUnit.SECONDS);
 							})
 							.exceptionally(t ->
 					         { // handle failure
@@ -184,7 +202,7 @@ public class FileListener extends ListenerAdapter {
 	 * @param event the onMessageReceived event
 	 * @return the file content
 	 */
-	private void getFileContent(Attachment doc, MessageReceivedEvent event) {
+	private void getFileContent(Attachment doc, MessageReceivedEvent event, String messageId) {
 		doc.retrieveInputStream().thenAccept(in -> {
 			builder = new StringBuilder();
 			byte[] buf = new byte[1024];
@@ -202,14 +220,14 @@ public class FileListener extends ListenerAdapter {
 				e.printStackTrace();
 			}
 			hasteString = Hastebin.paste(builder.toString());
-			System.out.println(hasteString);
+			Bot.logMsg(messageId, hasteString);
 			try {
 				url = new URI(hasteString + ".yml");
 				sendEmbed(channel, makeEmbed(channel, message, name, url));
 
 				for (File file : getFiles()) {
 					for (String[] lines : getFinder(file)) {
-						if (find(url, lines[0])) {
+						if (find(url, lines[0], messageId)) {
 							sendEmbed(channel, makeEmbedWithSolution(lines[1]));
 						}
 					}
@@ -224,7 +242,8 @@ public class FileListener extends ListenerAdapter {
 		});
 	}
 
-	public static boolean find(URI url, String entry) {
+	@SuppressWarnings("unused")
+	public static boolean find(URI url, String entry, String messageId) {
 		String id = hasteString.replace(Hastebin.getPasteURL(), "");
 		String URLString = Hastebin.getPasteURL() + "raw/" + id + "/";
 		boolean result = false;
@@ -239,7 +258,7 @@ public class FileListener extends ListenerAdapter {
 			while ((line = reader.readLine()) != null) {
 				currentLine ++;
 				if (line.contains(entry)) {
-					System.out.println("[Line " + currentLine + "] =" + entry);
+					Bot.logMsg(messageId, "Possible Solution Found");
 					return true;
 				}
 			}

@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -42,7 +44,7 @@ public class Configuration {
     private File file;
     private JsonObject json;
     public JsonParser jsonParser;
-    
+    private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public Configuration(final File file) {
 
@@ -119,7 +121,8 @@ public class Configuration {
                 }
 
                 BufferedWriter br = new BufferedWriter(new FileWriter(file));
-                br.write(json.toString());
+                String jsonOut = gson.toJson(json);
+                br.write(jsonOut);
                 br.close();
             }
         } catch (Exception e) {

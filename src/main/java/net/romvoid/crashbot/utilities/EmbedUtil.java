@@ -152,4 +152,14 @@ public class EmbedUtil {
             //TODO evaluate exception, i.e. bot does not have permission
         }));
     }
+    
+    public static void sendAndDelete(MessageChannel messageChannel, EmbedBuilder embed, long deleteInterval, TimeUnit deleteIntervalTimeUnit) {
+        messageChannel.sendMessage(embed.build()).queue(deleteInterval < 0
+                // do nothing if interval < 0
+                ? null
+                // else: delete after interval
+                : sentMessage -> sentMessage.delete().queueAfter(deleteInterval, deleteIntervalTimeUnit, null, ignored -> {
+            //TODO evaluate exception, i.e. bot does not have permission
+        }));
+    }
 }
