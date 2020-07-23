@@ -51,7 +51,7 @@ import net.romvoid.crashbot.commands.GithubCommand;
 import net.romvoid.crashbot.commands.InviteCommand;
 import net.romvoid.crashbot.config.Configuration;
 import net.romvoid.crashbot.config.Setup;
-import net.romvoid.crashbot.hastebin.FileListener;
+import net.romvoid.crashbot.file.FileListener;
 
 /**
  * The Main Bot Class.
