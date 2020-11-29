@@ -22,9 +22,7 @@
  */
 package net.romvoid.crashbot;
 
-import static net.dv8tion.jda.api.requests.GatewayIntent.GUILD_MEMBERS;
-import static net.dv8tion.jda.api.requests.GatewayIntent.GUILD_MESSAGES;
-import static net.dv8tion.jda.api.requests.GatewayIntent.GUILD_PRESENCES;
+import static net.dv8tion.jda.api.requests.GatewayIntent.*;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -51,7 +49,6 @@ import net.romvoid.crashbot.commands.GithubCommand;
 import net.romvoid.crashbot.commands.InviteCommand;
 import net.romvoid.crashbot.config.Configuration;
 import net.romvoid.crashbot.config.Setup;
-import net.romvoid.crashbot.file.FileListener;
 
 /**
  * The Main Bot Class.
@@ -76,7 +73,8 @@ public class Bot {
 
 	private static Set<GatewayIntent> intents = new HashSet<>();
 
-	public static final Logger LOG = (Logger) LoggerFactory.getLogger(Bot.class);
+	public static final Logger LOG = LoggerFactory.getLogger(Bot.class);
+
 
 	/**
 	 * Instantiates a new bot.
@@ -90,7 +88,6 @@ public class Bot {
 				configuration.set(configKey, input);
 			}
 		}
-
 		prefix = instance.configuration.getString("prefix");
 		setIntents();
 		client = new CommandClientBuilder();
@@ -102,6 +99,7 @@ public class Bot {
 		client.addCommands(new GithubCommand(), new InviteCommand(), new GuildlistCommand(waiter));
 		initJDA();
 
+		
 	}
 
 	/**
@@ -126,7 +124,7 @@ public class Bot {
 			instance.jda = (JDAImpl) JDABuilder.create(instance.configuration.getString("token"), intents)
 					.setStatus(OnlineStatus.DO_NOT_DISTURB)
 					.setActivity(Activity.playing("Galacticraft").asRichPresence())
-					.addEventListeners(waiter, client.build(), new FileListener())
+					.addEventListeners(waiter, client.build(), new MessageListener())
 					.disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOTE).build();
 		} catch (LoginException e) {
 			e.printStackTrace();

@@ -23,11 +23,9 @@
 package net.romvoid.crashbot.file.solution;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 public class FileUtil {
@@ -45,22 +43,4 @@ public class FileUtil {
 		return Pattern.matches("log.gz", getFileExtension(file.getName()));
 	}
 
-	public static void add(File in) {
-		int num = 0;
-		String save = "f";
-		File dest = new File("finders/" + save);
-		while (dest.exists()) {
-			save = "f_" + (num++);
-			dest = new File("finders/" + save);
-		}
-		try {
-			copyFile(in, dest);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private static void copyFile(File source, File dest) throws IOException {
-		FileUtils.copyFile(source, dest);
-	}
 }

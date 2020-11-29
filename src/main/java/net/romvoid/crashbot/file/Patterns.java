@@ -18,6 +18,11 @@ public final class Patterns {
 		public final static Pattern DISCORD_MSG_URL = Pattern
 				.compile("(https:\\/\\/cdn.discordapp.com\\/attachments\\/)(\\d{17,20})\\/(\\d{17,20})\\/");
 	}
+	
+	public static final class Url {
+		public static final Pattern PASTEURL = Pattern.compile("https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,4}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)");
+		public static final String DIVIDEURL = "((?:https?:\\/\\/)?\\.?(?:[-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9.-]+|(?:www.)[A-Za-z0-9.-]+)((?:\\/[\\+~%\\/.\\w-_]*)?\\??(?:[-\\+=&;%@.\\w_]*)#?(?:[.\\!\\/\\\\w]*))?";
+	}
 
 	public static final class Discord {
 		public final static Pattern DISCORD_ID = Pattern.compile("\\d{17,20}"); // ID

@@ -27,9 +27,15 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.json.JSONObject;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 public class HasteUtil {
 
@@ -38,6 +44,7 @@ public class HasteUtil {
 	 * 
 	 * */
 	private static String HASTEBIN_SERVER = "https://haste.romvoid.dev/"; // requires trailing slash
+	private static URI uri;
 	
     /**
      * A simple implementation of the Hastebin Client API, allowing data to be pasted online for
@@ -46,7 +53,7 @@ public class HasteUtil {
      * @param urlParameters The string to be sent in the body of the POST request
      * @return A formatted URL which links to the pasted file
      */
-    public synchronized static String paste(String urlParameters) {
+    public synchronized static void paste(String urlParameters) {
         HttpURLConnection connection = null;
         
         try {
@@ -57,7 +64,8 @@ public class HasteUtil {
             connection.setRequestMethod("POST");
             connection.setDoInput(true);
             connection.setDoOutput(true);
-
+            connection.setConnectTimeout(0);
+            
             //Send request
             DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
             wr.writeBytes(urlParameters);
@@ -69,14 +77,18 @@ public class HasteUtil {
             JSONObject object = new JSONObject(rd.readLine());
             String[] out = object.toString().replace("{", "").replace("}", "").replace("\"", "").split(":");
             String output = HASTEBIN_SERVER + out[1];
-            return output;
+            uri = new URI(output + ".crashlog");
 
-        } catch (IOException e) {
-            return null;
+        } catch (IOException | URISyntaxException e) {
+
         } finally {
-            if (connection == null) return null;
+            
             connection.disconnect();
         }
+    }
+    
+    public static URI getLink() {
+    	return uri;
     }
 
     /**
@@ -110,7 +122,7 @@ public class HasteUtil {
             URL URL = new URL(URLString);
             HttpURLConnection connection = (HttpURLConnection) URL.openConnection();
             connection.setDoOutput(true);
-            connection.setConnectTimeout(10000);
+            connection.setConnectTimeout(0);
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String paste = "";
             while (reader.ready()) {
@@ -123,5 +135,38 @@ public class HasteUtil {
         } catch (IOException e) {
             return "";
         }
+    }
+    
+    public static synchronized String getOtherPaste(String url) {
+        try {
+            URL URL = new URL(url);
+            HttpURLConnection connection = (HttpURLConnection) URL.openConnection();
+            connection.setDoOutput(true);
+            connection.setConnectTimeout(0);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String paste = "";
+            while (reader.ready()) {
+                String line = reader.readLine();
+                if (line.contains("package")) continue;
+                if (paste.equals("")) paste = line;
+                else paste = paste + "\n" + line;
+                uri = new URI(url);
+            }
+            return paste;
+        } catch (IOException | URISyntaxException e) {
+            return "";
+        }
+    }
+
+    public static synchronized String getCrashFromUbuntuPaste(String url) {
+    	try {
+    		Connection con = Jsoup.connect(url).ignoreHttpErrors(true).timeout(0);
+			Document doc = con.get();
+			Element paste = doc.select("pre").get(1);
+			return paste.text();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    	return "";
     }
 }

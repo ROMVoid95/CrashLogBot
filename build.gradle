@@ -7,7 +7,7 @@ plugins {
   
 mainClassName = 'net.romvoid.crashbot.Bot'
 group = 'net.romvoid.crashbot'
-version = '2.0.0'
+version = '3.0.0'
 
 description = 'A Minecraft logs Discord Bot'
 
@@ -34,6 +34,9 @@ dependencies {
 	// https://mvnrepository.com/artifact/commons-io/commons-io
 	compile group: 'commons-io', name: 'commons-io', version: '2.7'
 	
+	// https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
+	
 	// https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
 	compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.12'
 	
@@ -52,12 +55,20 @@ dependencies {
 	// https://bintray.com/minndevelopment/maven/discord-webhooks
 	compile group: 'club.minnced', name: 'discord-webhooks', version: '0.3.1'
 	
+	// https://search.maven.org/artifact/com.github.enerccio/gson-utilities/1.1.0/jar
+    compile group: 'com.github.enerccio', name: 'gson-utilities', version: '1.1.0'
+    
+    // https://mvnrepository.com/artifact/org.jsoup/jsoup
+    compile group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
+	
 	// https://search.maven.org/artifact/org.junit.jupiter/junit-jupiter-engine
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.7.0-M1'
 	
 	compile(group: 'org.kohsuke', name: 'github-api', version: '1.95'){
 		exclude module: 'okhttp'
     }
+    
+    compile 'com.github.ROMVoid95:ReadOnlyCfg:1.0.2'
 
 }
 
