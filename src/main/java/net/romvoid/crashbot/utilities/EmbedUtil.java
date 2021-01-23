@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.romvoid.crashbot.Bot;
 
 /**
  * Generates common embed messages.
@@ -96,7 +95,7 @@ public class EmbedUtil {
      * @return the given EmbedBuilder with a timestamp.
      */
     public static EmbedBuilder withTimestamp(EmbedBuilder embedBuilder) {
-        return embedBuilder.setFooter(Bot.getNewTimestamp(), null);
+        return embedBuilder;//.setFooter(Bot.getNewTimestamp(), null);
     }
 
     /**

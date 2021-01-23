@@ -1,31 +1,5 @@
-# Log file
-*.log
+# Ignore Gradle project-specific cache directory
+.gradle
 
-# IDE settings
-.classpath
-.project
-.vscode
-out/*
-target/*
-build/*
-
-# theia settings
-.theia/
-**/.settings/org.eclipse.buildship.core.prefs
-
-# IntelliJ files
-**/*.iml
-**/.idea
-**/.gradle
-*.ipr
-*.iws
-**/out/
-
-# gradle
-**/build/
-!gradle/wrapper/*.jar
-
-# Ignore Mac DS_Store files
-**/.DS_Store
-/bin/
-config.json
+# Ignore Gradle build output directory
+build

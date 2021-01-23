@@ -55,7 +55,7 @@ public class HasteUtil {
      */
     public synchronized static void paste(String urlParameters) {
         HttpURLConnection connection = null;
-        
+        // Bot.logMsg("");
         try {
             //Create connection
             URL url = new URL(HASTEBIN_SERVER + "documents");
